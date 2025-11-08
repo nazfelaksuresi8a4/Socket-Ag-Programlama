@@ -1,0 +1,12 @@
+#server = socket.socket() : server oluşturmamızı sağlar hem boş hemde server argümanları alınarak kullanılabilir örn; "socket.socket(socket.AF_INET,socket.SOCK_STREAM)" şeklinde yazılırsa bu bir server olur. Ayrıca birden fazla kullanım türüde mevcuttur.
+
+#server.accept() : bu fonksiyon bize bir tuple döner buradaki tuple (client,client_adress) şeklindedir amacı ise; server ile bağlantıya geçen clientin bilgilerini ve kendisin dönmektir bu sayede serverda bu fonksiyon ile bağlantı oluşturan clientlar üzerinden işlem gerçekleştirebilir,veri alışverişi ve vb vb şeyler yapabiliriz. Bununda bir cok kullanım alanı vardır. Çağırıldıktan sonra aşşağıdaki kısma geçmez bir bağlantı bekler 
+
+#server.listen(1) : bu fonksiyon adı üzerinden bellide olduğu gibi; dinleme yapılmadan önce çağırılması gerekir sebebi ise; bu fonksiyon çağılınca server'ın dinleme yapmaya hazır oldugunu belirtir aksi halde .accept() gibi fonksiyonlar hata verecektir
+
+#server.bind((ip,port)) : bu fonksiyon şunu yapar; serverımıza belirtilen ip ve port değerlerini atamak için kullanılır. Çünkü bu değerler olmaz ise server ile iletişime geçilemez.
+
+#server.send(byte_string) : bu fonksiyon ise kullanım türüne göre ya server'a yada client'a veri gönderir veriler string olarak gönderilemez genelde düşük seviyeli byte lar veya ASCİİ formatında gönderilir çünkü client ve server aralarında bu verilerle alış veriş yapacak şekilde tasarlanmıştır
+
+#server.recv() : bu ise dinleme yapan server veya client'a gönderilen veriyi orada yakalamak için kullanılır örneğin s.send(x.encode()) diyerek bir bytestring gönderdik ve sonrasında gönderilen yerdeki s.recv() fonksiyonu o bytestringi yakalar ayrıca; ham hali ile yakaladığı için .decode ile dekode edilmesei gerekir s.recv().decode() -> str
+
