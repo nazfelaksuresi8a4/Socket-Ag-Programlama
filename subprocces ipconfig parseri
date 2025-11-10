@@ -1,0 +1,40 @@
+#neyi parse edecek?: ipv4 maskeleri
+#nereden pare edecek: ipconfig terminal çıktılarından 
+#yöntemleri ne olacak 
+
+import subprocess
+import socket
+
+output_array = [[],[]]
+finded_header = None
+
+cmd = subprocess.run(args=['ipconfig'],capture_output=True,errors='replace')
+listed_cmd = cmd.stdout.splitlines()
+
+out_headers = ['IPv4 Address. . . . . . . . . . . :']
+
+
+for header in listed_cmd:
+    header = header.strip()
+    
+    for out_header in out_headers:
+        if header.startswith(out_header):
+            output_array[0].append(header.split('.')[0].strip())
+            output_array[1].append(header.split(':')[1].strip())
+                
+        else:
+            pass    
+
+e = 1    
+
+try:
+    for headerdata,ipv4_adress in zip(output_array[0],output_array[1]):
+        print(f'{headerdata}-{e}: {ipv4_adress}')
+
+        e += 1
+
+except Exception as parserWriteExcept:
+    print(parserWriteExcept)
+
+finally:
+    e = 1
