@@ -1,3 +1,6 @@
+#Bu kod basit ve prototip bir İstek yakalama sistemidir 
+#Kodda mesaj yakalama,bağlanan cihazın ip adresini görme bağlanan cihazın portunu görme gibi seçenekler bulunmaktadır bu bir proje değildir.
+
 import threading
 import socket 
 import time
@@ -7,7 +10,7 @@ from PyQt5.QtWidgets import*
 from PyQt5.QtGui import*
 
 class Thread(QObject):
-    signal = pyqtSignal(str,int)
+    signal = pyqtSignal(str,str,str)
     
     def __init__(self,ip,port):
         super().__init__()
@@ -28,10 +31,11 @@ class Thread(QObject):
     def streamLoop(self):
         while self.stream_event:
             self.client,self.client_adress = self.server.accept()
+            message = self.client.recv(1024).decode()
 
             self.client_ip,self.client_port = self.client.getsockname()
 
-            print(self.client)
+            self.signal.emit(str(message),str(self.client_ip),str(self.client_port))
 
 class mainWindow(QMainWindow):
     def __init__(self):
@@ -56,7 +60,7 @@ class mainWindow(QMainWindow):
         splitter.addWidget(self.signal_2_btn)
         splitter.addWidget(self.connections)
 
-        self.setStyleSheet('background-color:black')
+        self.setStyleSheet('background-color:gray')
 
         self.signal_1_btn.setStyleSheet('background-color:red;font-size:50px;font-weight:bold')
         self.signal_2_btn.setStyleSheet('background-color:red;font-size:50px;font-weight:bold')
@@ -83,6 +87,24 @@ class mainWindow(QMainWindow):
 
         mainthread.start()
         mainthread.started.connect(self.signalClass.start_server)
+        self.signalClass.signal.connect(self.updatef)
+
+        self.index = 0
+        self.connections_index = 0
+        self.connections_list = []
+    
+    def updatef(self,msg,ip,port):
+        if len(self.connections_list) == 2:
+            conn = len(set(self.connections_list))
+            self.connections.setText(f'Baglantilar: {conn}')
+
+        self.index += 1
+
+        self.connections_list.append(str(ip))
+
+        QMessageBox.warning(self,f'BAĞLANTI GERÇEKLEŞTİ',f'BAGLANAN İP: {ip}\nBAGLANAN PORT: {port}\nMESAJ: {msg}')
+
+        self.signal_1_btn.setText(str(self.index))
  
 
 
