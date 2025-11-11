@@ -1,0 +1,93 @@
+import threading
+import socket 
+import time
+import sys as _s
+from PyQt5.QtCore import*
+from PyQt5.QtWidgets import*
+from PyQt5.QtGui import*
+
+class Thread(QObject):
+    signal = pyqtSignal(str,int)
+    
+    def __init__(self,ip,port):
+        super().__init__()
+        
+        self.ip = ip
+        self.port = port     
+        self.stream_event = True   
+
+    def start_server(self):
+        self.server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        self.server.bind((self.ip,self.port))
+        self.server.listen(1)
+        
+        print(f'İp dinleniyor: {self.ip},{self.port}')
+
+        self.streamLoop()
+
+    def streamLoop(self):
+        while self.stream_event:
+            self.client,self.client_adress = self.server.accept()
+
+            self.client_ip,self.client_port = self.client.getsockname()
+
+            print(self.client)
+
+class mainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        layout = QVBoxLayout()
+        widget = QWidget()
+        
+        splitter = QSplitter(Qt.Horizontal)
+
+        widget.setLayout(layout)
+
+        self.literal = 0
+
+        self.signal_1_btn = QPushButton(text='0')
+        self.signal_2_btn = QPushButton(text='1')
+        self.connections = QLabel(text=f'Bağlantılar: {self.literal}')
+
+        self.connections.setAlignment(Qt.AlignCenter)
+
+        layout.addWidget(splitter)
+        splitter.addWidget(self.signal_1_btn)
+        splitter.addWidget(self.signal_2_btn)
+        splitter.addWidget(self.connections)
+
+        self.setStyleSheet('background-color:black')
+
+        self.signal_1_btn.setStyleSheet('background-color:red;font-size:50px;font-weight:bold')
+        self.signal_2_btn.setStyleSheet('background-color:red;font-size:50px;font-weight:bold')
+        self.connections.setStyleSheet('background-color:gray;font-size:35px;font-weight:italic')
+        
+        self.signal_1_btn.clicked.connect(self.Emitter)
+
+        self.setCentralWidget(widget)
+    
+    def getLocalAdress(self):
+        localServer = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+
+        localServer.connect(('8.8.8.8',53)) #google dns
+
+        return localServer.getsockname()
+
+    def Emitter(self):
+        local_ip,local_port = self.getLocalAdress()
+
+        self.signalClass = Thread(str(local_ip),int(local_port))
+
+        mainthread = QThread(self)
+        self.signalClass.moveToThread(mainthread)
+
+        mainthread.start()
+        mainthread.started.connect(self.signalClass.start_server)
+ 
+
+
+if __name__ == "__main__":
+    sp = QApplication(_s.argv)
+    sw = mainWindow()
+    sw.show()
+    _s.exit(sp.exec_())
